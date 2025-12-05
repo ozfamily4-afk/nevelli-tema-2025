@@ -4363,9 +4363,13 @@ ul li a:hover span {
   transform: scale(1.08);
 }
 /* === MODERN GLASSMORPHISM HEADER - OVERRIDE ALL OLD STYLES === */
-/* Glassmorphism header background - Applied to header component */
+/* Glassmorphism header background - MAXIMUM SPECIFICITY */
 #header-component.header--glassmorphism,
-header-component#header-component.header--glassmorphism {
+header-component#header-component.header--glassmorphism,
+#header-component.header--glassmorphism[style],
+header-component#header-component.header--glassmorphism[style],
+.header-section #header-component.header--glassmorphism,
+body #header-component.header--glassmorphism {
   background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(12px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
@@ -4373,14 +4377,23 @@ header-component#header-component.header--glassmorphism {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Header rows - apply glassmorphism effect */
+/* Header rows - apply glassmorphism effect - OVERRIDE COLOR SCHEMES */
 #header-component.header--glassmorphism .header__row,
 #header-component.header--glassmorphism .header__row--top,
-#header-component.header--glassmorphism .header__row--bottom {
+#header-component.header--glassmorphism .header__row--bottom,
+#header-component.header--glassmorphism .header__row[class*="color-"],
+#header-component.header--glassmorphism .header__row--top[class*="color-"],
+#header-component.header--glassmorphism .header__row--bottom[class*="color-"],
+#header-component.header--glassmorphism .header__row.section,
+#header-component.header--glassmorphism .header__row--top.section,
+#header-component.header--glassmorphism .header__row--bottom.section,
+#header-component.header--glassmorphism .header__row[style],
+#header-component.header--glassmorphism .header__row--top[style],
+#header-component.header--glassmorphism .header__row--bottom[style] {
   background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(12px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-  background-color: transparent !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   background-image: none !important;
 }
 
