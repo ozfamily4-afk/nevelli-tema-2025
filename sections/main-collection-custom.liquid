@@ -1,0 +1,212 @@
+{% comment %}
+  Custom Collection Section — Navelli (Max 3 full-width columns)
+  Clean grid, fully filled row, responsive design
+{% endcomment %}
+
+<!-- ====== BANNER ====== -->
+<section 
+  class="custom-collection-banner"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    {% if section.settings.bg_image != blank %}
+      background-image: url('{{ section.settings.bg_image | image_url: width: 2000 }}');
+      background-size: cover;
+      background-position: center;
+    {% endif %}
+  "
+>
+  <div class="page-width text-center banner-inner" style="padding: 60px 20px;">
+    <h1 
+      class="collection-title"
+      style="color: {{ section.settings.text_color }}; font-size: 42px; font-weight: 600; margin-bottom: 15px;"
+    >
+      {{ collection.title }}
+    </h1>
+
+    {% if collection.description != blank %}
+      <div 
+        class="collection-description"
+        style="color: {{ section.settings.text_color }}; max-width: 800px; margin: 0 auto; font-size: 16px; line-height: 1.6;"
+      >
+        {{ collection.description }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ====== PRODUCT GRID ====== -->
+<section class="custom-collection-grid" style="padding: 70px 0; background-color: #fff;">
+  <div class="product-grid-wrapper">
+    {% for product in collection.products %}
+      <div class="product-card">
+        <a href="{{ product.url }}" style="text-decoration: none; display: block;">
+          <div class="product-image">
+            {% if product.featured_image %}
+              <img 
+                src="{{ product.featured_image | image_url: width: 700 }}" 
+                alt="{{ product.title | escape }}" 
+                loading="lazy"
+              >
+            {% endif %}
+            {% if product.compare_at_price > product.price %}
+              <div class="product-badge">SALE</div>
+            {% endif %}
+          </div>
+          <div class="product-info">
+            <h3>{{ product.title }}</h3>
+            <p>
+              {% if product.compare_at_price > product.price %}
+                <span class="compare">{{ product.compare_at_price | money }}</span>
+              {% endif %}
+              <span class="price">{{ product.price | money }}</span>
+            </p>
+          </div>
+        </a>
+      </div>
+    {% else %}
+      <p style="text-align:center;">No products found in this collection.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ====== STYLES ====== -->
+<style>
+  /* === GRID WRAPPER === */
+  .product-grid-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 sütun */
+    gap: 35px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    box-sizing: border-box;
+  }
+
+  /* === PRODUCT CARD === */
+  .product-card {
+    width: 100%;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+  }
+
+  /* === PRODUCT IMAGE === */
+.product-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3; /* sabit oran, düzgün görünüm */
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* taşmadan sığdırır */
+  object-position: center;
+  transition: transform 0.3s ease;
+  background-color: #fff; /* beyaz arka plan */
+}
+
+.product-card:hover img {
+  transform: scale(1.03);
+}
+
+
+  /* === PRODUCT INFO === */
+  .product-info {
+    margin-top: 12px;
+  }
+
+  .product-info h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: #000;
+    margin-bottom: 4px;
+    letter-spacing: 0.4px;
+  }
+
+  .product-info p {
+    font-size: 12px;
+    color: #000;
+    margin: 0;
+  }
+
+  .product-info .compare {
+    text-decoration: line-through;
+    color: #b5b5b5;
+    margin-right: 6px;
+  }
+
+  .product-info .price {
+    font-weight: 600;
+  }
+
+  /* === SALE BADGE === */
+  .product-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #b42e2e;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 7px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* === RESPONSIVE === */
+  @media screen and (max-width: 1024px) {
+    .product-grid-wrapper {
+      grid-template-columns: repeat(2, 1fr);
+      padding: 0 25px;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .product-grid-wrapper {
+      grid-template-columns: 1fr;
+      padding: 0 15px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Collection Section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Section"
+    }
+  ]
+}
+{% endschema %}

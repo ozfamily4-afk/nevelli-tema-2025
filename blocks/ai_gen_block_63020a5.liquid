@@ -1,0 +1,1237 @@
+{% doc %}
+  @prompt
+    bir mobilya mağazasının productları en iyi nasıl görünecekse öyle bir block oluştur,herşey ingilizce olmalı, benim ürünlerime entegre olması lazım ama, ürünün düğer fotoğraflarıda lead image in altında gözüksün ve seçilebilir olsun, tamam iyi gidiyoruz,bunların altında ürünün eğer variantları varsa onlar olsun.Fiyatın hemen altında add to card olsun envanterde ürün varsa.birde fotoğraflara tıklayınca fotoraflar tam ekranda görünsün, add to cart nerde?, variantlar en aşağıda ürünün kendi resimlerinden ayrı grid formatında görünsün ve add to cart ile options kısmının arasında boşluk olsun,  make large product variant options gallery at the bottom showing all available configurations with images in a grid format.and options should be selectable.when i choose an option its picture should appear
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-furniture-product-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ai-furniture-product__container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ block.settings.spacing }}px;
+    align-items: start;
+  }
+
+  .ai-furniture-product__media-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ai-furniture-product__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_ratio }};
+    overflow: hidden;
+    background-color: {{ block.settings.image_background }};
+    cursor: zoom-in;
+  }
+
+  .ai-furniture-product__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-furniture-product__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    position: relative;
+  }
+
+  .ai-furniture-product__placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-furniture-product__empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .ai-furniture-product__thumbnails-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+  }
+
+  .ai-furniture-product__thumbnail-{{ ai_gen_id }} {
+    position: relative;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background-color: {{ block.settings.image_background }};
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .ai-furniture-product__thumbnail-{{ ai_gen_id }}:hover {
+    border-color: {{ block.settings.thumbnail_hover_border }};
+  }
+
+  .ai-furniture-product__thumbnail-{{ ai_gen_id }}.active {
+    border-color: {{ block.settings.thumbnail_active_border }};
+  }
+
+  .ai-furniture-product__thumbnail-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-furniture-product__lightbox-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .ai-furniture-product__lightbox-{{ ai_gen_id }}.active {
+    display: flex;
+  }
+
+  .ai-furniture-product__lightbox-image-{{ ai_gen_id }} {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-furniture-product__lightbox-close-{{ ai_gen_id }} {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 40px;
+    cursor: pointer;
+    padding: 10px;
+    line-height: 1;
+  }
+
+  .ai-furniture-product__content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.content_spacing }}px;
+    padding: {{ block.settings.content_padding }}px;
+  }
+
+  .ai-furniture-product__category-{{ ai_gen_id }} {
+    font-size: {{ block.settings.category_size }}px;
+    color: {{ block.settings.category_color }};
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+  }
+
+  .ai-furniture-product__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .ai-furniture-product__description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.description_color }};
+    line-height: 1.6;
+  }
+
+  .ai-furniture-product__price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.price_size }}px;
+    color: {{ block.settings.price_color }};
+    font-weight: 600;
+  }
+
+  .ai-furniture-product__price--compare-{{ ai_gen_id }} {
+    text-decoration: line-through;
+    opacity: 0.6;
+    font-size: {{ block.settings.price_size | times: 0.85 }}px;
+    margin-left: 8px;
+  }
+
+  .ai-furniture-product__add-to-cart-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 40px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: {{ block.settings.button_size }}px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .ai-furniture-product__add-to-cart-{{ ai_gen_id }}:hover:not(:disabled) {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .ai-furniture-product__add-to-cart-{{ ai_gen_id }}:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ai-furniture-product__features-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ai-furniture-product__feature-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: {{ block.settings.feature_size }}px;
+    color: {{ block.settings.feature_color }};
+  }
+
+  .ai-furniture-product__feature-icon-{{ ai_gen_id }} {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: {{ block.settings.icon_color }};
+  }
+
+  .ai-furniture-product__specs-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: {{ block.settings.specs_padding }}px;
+    background-color: {{ block.settings.specs_background }};
+  }
+
+  .ai-furniture-product__spec-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ai-furniture-product__spec-label-{{ ai_gen_id }} {
+    font-size: 12px;
+    color: {{ block.settings.spec_label_color }};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-furniture-product__spec-value-{{ ai_gen_id }} {
+    font-size: 14px;
+    color: {{ block.settings.spec_value_color }};
+    font-weight: 500;
+  }
+
+  .ai-furniture-product__badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 6px 12px;
+    background-color: {{ block.settings.badge_background }};
+    color: {{ block.settings.badge_text_color }};
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+  }
+
+  .ai-furniture-product__variant-gallery-{{ ai_gen_id }} {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid {{ block.settings.variant_border }};
+  }
+
+  .ai-furniture-product__variant-gallery-title-{{ ai_gen_id }} {
+    font-size: 20px;
+    font-weight: 600;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 24px 0;
+  }
+
+  .ai-furniture-product__variant-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax({{ block.settings.variant_card_size }}px, 1fr));
+    gap: {{ block.settings.variant_grid_gap }}px;
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }} {
+    position: relative;
+    cursor: pointer;
+    border: 3px solid {{ block.settings.variant_border }};
+    background-color: {{ block.settings.variant_background }};
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }}:hover {
+    border-color: {{ block.settings.variant_hover_border }};
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }}.active {
+    border-color: {{ block.settings.variant_active_border }};
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }}.unavailable {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }}.unavailable:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .ai-furniture-product__variant-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background-color: {{ block.settings.image_background }};
+  }
+
+  .ai-furniture-product__variant-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-furniture-product__variant-info-{{ ai_gen_id }} {
+    padding: 12px;
+    text-align: center;
+  }
+
+  .ai-furniture-product__variant-name-{{ ai_gen_id }} {
+    font-size: 14px;
+    font-weight: 600;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 4px 0;
+  }
+
+  .ai-furniture-product__variant-price-{{ ai_gen_id }} {
+    font-size: 16px;
+    font-weight: 600;
+    color: {{ block.settings.price_color }};
+  }
+
+  .ai-furniture-product__variant-unavailable-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 2;
+  }
+
+  .ai-furniture-product__variant-checkmark-{{ ai_gen_id }} {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background-color: {{ block.settings.variant_active_border }};
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .ai-furniture-product__variant-card-{{ ai_gen_id }}.active .ai-furniture-product__variant-checkmark-{{ ai_gen_id }} {
+    display: flex;
+  }
+
+  .ai-furniture-product__variant-checkmark-{{ ai_gen_id }} svg {
+    width: 20px;
+    height: 20px;
+    color: #ffffff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-furniture-product__container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.spacing | times: 0.7 }}px;
+    }
+
+    .ai-furniture-product__content-{{ ai_gen_id }} {
+      padding: {{ block.settings.content_padding | times: 0.7 }}px;
+    }
+
+    .ai-furniture-product__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-furniture-product__specs-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+
+    .ai-furniture-product__thumbnails-{{ ai_gen_id }} {
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+
+    .ai-furniture-product__variant-grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .ai-furniture-product__lightbox-{{ ai_gen_id }} {
+      padding: 20px;
+    }
+  }
+{% endstyle %}
+
+<product-gallery-{{ ai_gen_id }} class="ai-furniture-product-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.product != blank %}
+    {% assign selected_product = block.settings.product %}
+  {% else %}
+    {% assign selected_product = product %}
+  {% endif %}
+
+  <div class="ai-furniture-product__container-{{ ai_gen_id }}">
+    <div class="ai-furniture-product__media-{{ ai_gen_id }}">
+      <div class="ai-furniture-product__image-wrapper-{{ ai_gen_id }}" data-image-wrapper>
+        {% if selected_product.featured_image %}
+          {% if selected_product.compare_at_price > selected_product.price %}
+            <div class="ai-furniture-product__badge-{{ ai_gen_id }}">
+              Sale
+            </div>
+          {% endif %}
+          <img
+            src="{{ selected_product.featured_image | image_url: width: 1200 }}"
+            alt="{{ selected_product.featured_image.alt | escape }}"
+            loading="lazy"
+            width="{{ selected_product.featured_image.width }}"
+            height="{{ selected_product.featured_image.height }}"
+            class="ai-furniture-product__image-{{ ai_gen_id }}"
+            data-main-image
+          >
+        {% else %}
+          <div class="ai-furniture-product__placeholder-{{ ai_gen_id }}">
+            {{ 'product-1' | placeholder_svg_tag }}
+            <div class="ai-furniture-product__empty-state-{{ ai_gen_id }}">
+              Select a product
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if selected_product.images.size > 1 %}
+        <div class="ai-furniture-product__thumbnails-{{ ai_gen_id }}">
+          {% for image in selected_product.images %}
+            <button
+              class="ai-furniture-product__thumbnail-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+              data-thumbnail
+              data-image-url="{{ image | image_url: width: 1200 }}"
+              data-image-full="{{ image | image_url: width: 2000 }}"
+              data-image-alt="{{ image.alt | escape }}"
+              aria-label="View image {{ forloop.index }}"
+            >
+              <img
+                src="{{ image | image_url: width: 200 }}"
+                alt="{{ image.alt | escape }}"
+                loading="lazy"
+                width="200"
+                height="200"
+                class="ai-furniture-product__thumbnail-image-{{ ai_gen_id }}"
+              >
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="ai-furniture-product__content-{{ ai_gen_id }}">
+      {% if selected_product.type != blank and block.settings.show_category %}
+        <p class="ai-furniture-product__category-{{ ai_gen_id }}">{{ selected_product.type }}</p>
+      {% endif %}
+
+      {% if selected_product.title != blank %}
+        <h2 class="ai-furniture-product__title-{{ ai_gen_id }}">{{ selected_product.title }}</h2>
+      {% endif %}
+
+      {% if selected_product.description != blank and block.settings.show_description %}
+        <div class="ai-furniture-product__description-{{ ai_gen_id }}">
+          {{ selected_product.description | strip_html | truncate: 200 }}
+        </div>
+      {% endif %}
+
+      {% if selected_product.price %}
+        <div class="ai-furniture-product__price-{{ ai_gen_id }}" data-price>
+          {{ selected_product.price | money }}
+          {% if selected_product.compare_at_price > selected_product.price %}
+            <span class="ai-furniture-product__price--compare-{{ ai_gen_id }}">
+              {{ selected_product.compare_at_price | money }}
+            </span>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {%- form 'product', selected_product -%}
+        <input type="hidden" name="id" data-variant-id value="{{ selected_product.selected_or_first_available_variant.id }}">
+        
+        <button
+          type="submit"
+          class="ai-furniture-product__add-to-cart-{{ ai_gen_id }}"
+          data-add-to-cart
+          {% unless selected_product.selected_or_first_available_variant.available %}disabled{% endunless %}
+        >
+          {% if selected_product.selected_or_first_available_variant.available %}
+            Add to Cart
+          {% else %}
+            Sold Out
+          {% endif %}
+        </button>
+      {%- endform -%}
+
+      {% if block.settings.show_features %}
+        <ul class="ai-furniture-product__features-{{ ai_gen_id }}">
+          {% if block.settings.feature_1 != blank %}
+            <li class="ai-furniture-product__feature-{{ ai_gen_id }}">
+              <svg class="ai-furniture-product__feature-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>{{ block.settings.feature_1 }}</span>
+            </li>
+          {% endif %}
+          {% if block.settings.feature_2 != blank %}
+            <li class="ai-furniture-product__feature-{{ ai_gen_id }}">
+              <svg class="ai-furniture-product__feature-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>{{ block.settings.feature_2 }}</span>
+            </li>
+          {% endif %}
+          {% if block.settings.feature_3 != blank %}
+            <li class="ai-furniture-product__feature-{{ ai_gen_id }}">
+              <svg class="ai-furniture-product__feature-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>{{ block.settings.feature_3 }}</span>
+            </li>
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      {% if block.settings.show_specs %}
+        <div class="ai-furniture-product__specs-{{ ai_gen_id }}">
+          {% if block.settings.spec_1_label != blank and block.settings.spec_1_value != blank %}
+            <div class="ai-furniture-product__spec-{{ ai_gen_id }}">
+              <span class="ai-furniture-product__spec-label-{{ ai_gen_id }}">{{ block.settings.spec_1_label }}</span>
+              <span class="ai-furniture-product__spec-value-{{ ai_gen_id }}">{{ block.settings.spec_1_value }}</span>
+            </div>
+          {% endif %}
+          {% if block.settings.spec_2_label != blank and block.settings.spec_2_value != blank %}
+            <div class="ai-furniture-product__spec-{{ ai_gen_id }}">
+              <span class="ai-furniture-product__spec-label-{{ ai_gen_id }}">{{ block.settings.spec_2_label }}</span>
+              <span class="ai-furniture-product__spec-value-{{ ai_gen_id }}">{{ block.settings.spec_2_value }}</span>
+            </div>
+          {% endif %}
+          {% if block.settings.spec_3_label != blank and block.settings.spec_3_value != blank %}
+            <div class="ai-furniture-product__spec-{{ ai_gen_id }}">
+              <span class="ai-furniture-product__spec-label-{{ ai_gen_id }}">{{ block.settings.spec_3_label }}</span>
+              <span class="ai-furniture-product__spec-value-{{ ai_gen_id }}">{{ block.settings.spec_3_value }}</span>
+            </div>
+          {% endif %}
+          {% if block.settings.spec_4_label != blank and block.settings.spec_4_value != blank %}
+            <div class="ai-furniture-product__spec-{{ ai_gen_id }}">
+              <span class="ai-furniture-product__spec-label-{{ ai_gen_id }}">{{ block.settings.spec_4_label }}</span>
+              <span class="ai-furniture-product__spec-value-{{ ai_gen_id }}">{{ block.settings.spec_4_value }}</span>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if selected_product.variants.size > 1 and block.settings.show_variant_gallery %}
+    <div class="ai-furniture-product__variant-gallery-{{ ai_gen_id }}">
+      <h3 class="ai-furniture-product__variant-gallery-title-{{ ai_gen_id }}">
+        {{ block.settings.variant_gallery_title }}
+      </h3>
+      <div class="ai-furniture-product__variant-grid-{{ ai_gen_id }}">
+        {% for variant in selected_product.variants %}
+          <div
+            class="ai-furniture-product__variant-card-{{ ai_gen_id }} {% if variant.id == selected_product.selected_or_first_available_variant.id %}active{% endif %} {% unless variant.available %}unavailable{% endunless %}"
+            data-variant-card
+            data-variant-id="{{ variant.id }}"
+            data-variant-image="{% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 }}{% else %}{{ selected_product.featured_image | image_url: width: 1200 }}{% endif %}"
+          >
+            <div class="ai-furniture-product__variant-image-wrapper-{{ ai_gen_id }}">
+              {% if variant.featured_image %}
+                <img
+                  src="{{ variant.featured_image | image_url: width: 400 }}"
+                  alt="{{ variant.title | escape }}"
+                  loading="lazy"
+                  width="400"
+                  height="400"
+                  class="ai-furniture-product__variant-image-{{ ai_gen_id }}"
+                >
+              {% else %}
+                <img
+                  src="{{ selected_product.featured_image | image_url: width: 400 }}"
+                  alt="{{ variant.title | escape }}"
+                  loading="lazy"
+                  width="400"
+                  height="400"
+                  class="ai-furniture-product__variant-image-{{ ai_gen_id }}"
+                >
+              {% endif %}
+              
+              {% unless variant.available %}
+                <div class="ai-furniture-product__variant-unavailable-{{ ai_gen_id }}">
+                  Sold Out
+                </div>
+              {% endunless %}
+
+              <div class="ai-furniture-product__variant-checkmark-{{ ai_gen_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="ai-furniture-product__variant-info-{{ ai_gen_id }}">
+              <h4 class="ai-furniture-product__variant-name-{{ ai_gen_id }}">{{ variant.title }}</h4>
+              <div class="ai-furniture-product__variant-price-{{ ai_gen_id }}">{{ variant.price | money }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="ai-furniture-product__lightbox-{{ ai_gen_id }}" data-lightbox>
+    <button class="ai-furniture-product__lightbox-close-{{ ai_gen_id }}" data-lightbox-close aria-label="Close">&times;</button>
+    <img class="ai-furniture-product__lightbox-image-{{ ai_gen_id }}" data-lightbox-image src="" alt="">
+  </div>
+
+  <script type="application/json" data-product-json>
+    {{ selected_product | json }}
+  </script>
+</product-gallery-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ProductGallery{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.mainImage = this.querySelector('[data-main-image]');
+        this.thumbnails = this.querySelectorAll('[data-thumbnail]');
+        this.imageWrapper = this.querySelector('[data-image-wrapper]');
+        this.lightbox = this.querySelector('[data-lightbox]');
+        this.lightboxImage = this.querySelector('[data-lightbox-image]');
+        this.lightboxClose = this.querySelector('[data-lightbox-close]');
+        this.variantCards = this.querySelectorAll('[data-variant-card]');
+        this.variantIdInput = this.querySelector('[data-variant-id]');
+        this.addToCartButton = this.querySelector('[data-add-to-cart]');
+        this.priceElement = this.querySelector('[data-price]');
+        
+        const productJson = this.querySelector('[data-product-json]');
+        if (productJson) {
+          this.productData = JSON.parse(productJson.textContent);
+        }
+        
+        if (this.mainImage && this.thumbnails.length > 0) {
+          this.setupThumbnails();
+        }
+        
+        if (this.imageWrapper && this.lightbox) {
+          this.setupLightbox();
+        }
+        
+        if (this.variantCards.length > 0) {
+          this.setupVariantGallery();
+        }
+      }
+
+      setupThumbnails() {
+        this.thumbnails.forEach((thumbnail) => {
+          thumbnail.addEventListener('click', () => {
+            const imageUrl = thumbnail.getAttribute('data-image-url');
+            const imageAlt = thumbnail.getAttribute('data-image-alt');
+            
+            this.mainImage.src = imageUrl;
+            this.mainImage.alt = imageAlt;
+            
+            this.thumbnails.forEach((thumb) => thumb.classList.remove('active'));
+            thumbnail.classList.add('active');
+          });
+        });
+      }
+
+      setupLightbox() {
+        this.imageWrapper.addEventListener('click', () => {
+          const activeThumbnail = this.querySelector('[data-thumbnail].active');
+          if (activeThumbnail) {
+            const fullImageUrl = activeThumbnail.getAttribute('data-image-full');
+            const imageAlt = this.mainImage.alt;
+            
+            this.lightboxImage.src = fullImageUrl;
+            this.lightboxImage.alt = imageAlt;
+            this.lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+          }
+        });
+
+        this.lightboxClose.addEventListener('click', () => {
+          this.closeLightbox();
+        });
+
+        this.lightbox.addEventListener('click', (e) => {
+          if (e.target === this.lightbox) {
+            this.closeLightbox();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.lightbox.classList.contains('active')) {
+            this.closeLightbox();
+          }
+        });
+      }
+
+      closeLightbox() {
+        this.lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      setupVariantGallery() {
+        this.variantCards.forEach((card) => {
+          card.addEventListener('click', () => {
+            if (card.classList.contains('unavailable')) {
+              return;
+            }
+
+            const variantId = card.getAttribute('data-variant-id');
+            const variantImage = card.getAttribute('data-variant-image');
+            
+            this.variantCards.forEach((c) => c.classList.remove('active'));
+            card.classList.add('active');
+            
+            this.variantIdInput.value = variantId;
+            
+            if (variantImage && this.mainImage) {
+              this.mainImage.src = variantImage;
+            }
+            
+            const selectedVariant = this.productData.variants.find((v) => v.id == variantId);
+            
+            if (selectedVariant && this.priceElement) {
+              let priceHTML = this.formatMoney(selectedVariant.price);
+              if (selectedVariant.compare_at_price > selectedVariant.price) {
+                priceHTML += `<span class="ai-furniture-product__price--compare-{{ ai_gen_id }}">${this.formatMoney(selectedVariant.compare_at_price)}</span>`;
+              }
+              this.priceElement.innerHTML = priceHTML;
+            }
+            
+            if (this.addToCartButton && selectedVariant) {
+              if (selectedVariant.available) {
+                this.addToCartButton.disabled = false;
+                this.addToCartButton.textContent = 'Add to Cart';
+              } else {
+                this.addToCartButton.disabled = true;
+                this.addToCartButton.textContent = 'Sold Out';
+              }
+            }
+          });
+        });
+      }
+
+      formatMoney(cents) {
+        const amount = cents / 100;
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: this.productData.price.currency || 'USD'
+        }).format(amount);
+      }
+    }
+
+    customElements.define('product-gallery-{{ ai_gen_id }}', ProductGallery{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Furniture showcase",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "paragraph",
+      "content": "Leave empty to use the current product on product pages"
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "4/3",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "3/4",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "16/9",
+          "label": "Wide (16:9)"
+        }
+      ],
+      "default": "4/3"
+    },
+    {
+      "type": "color",
+      "id": "image_background",
+      "label": "Background",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "color",
+      "id": "thumbnail_hover_border",
+      "label": "Thumbnail hover border",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "thumbnail_active_border",
+      "label": "Thumbnail active border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Content display"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_category",
+      "label": "Show category",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Variant gallery"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_gallery",
+      "label": "Show variant gallery",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "variant_gallery_title",
+      "label": "Gallery title",
+      "default": "Available Configurations"
+    },
+    {
+      "type": "range",
+      "id": "variant_card_size",
+      "min": 150,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Card size",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "variant_grid_gap",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Grid gap",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "variant_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "variant_border",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "variant_hover_border",
+      "label": "Hover border",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "variant_active_border",
+      "label": "Active border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Features"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_features",
+      "label": "Show features",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "feature_1",
+      "label": "Feature 1",
+      "default": "Premium materials"
+    },
+    {
+      "type": "text",
+      "id": "feature_2",
+      "label": "Feature 2",
+      "default": "Handcrafted quality"
+    },
+    {
+      "type": "text",
+      "id": "feature_3",
+      "label": "Feature 3",
+      "default": "5-year warranty"
+    },
+    {
+      "type": "header",
+      "content": "Specifications"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_specs",
+      "label": "Show specifications",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "spec_1_label",
+      "label": "Spec 1 label",
+      "default": "Dimensions"
+    },
+    {
+      "type": "text",
+      "id": "spec_1_value",
+      "label": "Spec 1 value",
+      "default": "220 x 90 x 85 cm"
+    },
+    {
+      "type": "text",
+      "id": "spec_2_label",
+      "label": "Spec 2 label",
+      "default": "Material"
+    },
+    {
+      "type": "text",
+      "id": "spec_2_value",
+      "label": "Spec 2 value",
+      "default": "Premium Leather"
+    },
+    {
+      "type": "text",
+      "id": "spec_3_label",
+      "label": "Spec 3 label",
+      "default": "Color"
+    },
+    {
+      "type": "text",
+      "id": "spec_3_value",
+      "label": "Spec 3 value",
+      "default": "Multiple options"
+    },
+    {
+      "type": "text",
+      "id": "spec_4_label",
+      "label": "Spec 4 label",
+      "default": "Weight"
+    },
+    {
+      "type": "text",
+      "id": "spec_4_value",
+      "label": "Spec 4 value",
+      "default": "65 kg"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "min": 20,
+      "max": 80,
+      "step": 10,
+      "unit": "px",
+      "label": "Grid spacing",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 0,
+      "max": 60,
+      "step": 10,
+      "unit": "px",
+      "label": "Content padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_spacing",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Content spacing",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "specs_padding",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Specs padding",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "category_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Category",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Title",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "price_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Price",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "feature_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Feature",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "category_color",
+      "label": "Category",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "feature_color",
+      "label": "Feature text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Feature icon",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "specs_background",
+      "label": "Specs background",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "color",
+      "id": "spec_label_color",
+      "label": "Spec label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "spec_value_color",
+      "label": "Spec value",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "badge_background",
+      "label": "Sale badge background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Sale badge text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Furniture showcase"
+    }
+  ]
+}
+{% endschema %}
