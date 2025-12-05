@@ -4362,41 +4362,58 @@ ul li a:hover span {
   -webkit-text-fill-color: transparent;
   transform: scale(1.08);
 }
-/* === MODERN GLASSMORPHISM HEADER === */
-/* Clean menu styles - no backgrounds, just text */
-.header--glassmorphism .menu-list__link,
-.header--glassmorphism .menu-list__list-item,
-.header--glassmorphism .header__menu-item,
-.header--glassmorphism .header__inline-menu a,
-.header--glassmorphism .header__inline-menu button {
-  background-color: transparent !important;
-  background: transparent !important;
-  border: none !important;
-  color: var(--color-foreground, #1a1a1a) !important;
+/* === MODERN GLASSMORPHISM HEADER - OVERRIDE ALL OLD STYLES === */
+/* Glassmorphism header background */
+#header-component.header--glassmorphism,
+header-component#header-component.header--glassmorphism {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-.header--glassmorphism .menu-list__link:hover,
-.header--glassmorphism .menu-list__link:focus,
-.header--glassmorphism .menu-list__list-item:hover .menu-list__link {
+/* Clean menu styles - no backgrounds, just text - STRONG SELECTORS */
+#header-component.header--glassmorphism .menu-list__link,
+#header-component.header--glassmorphism .menu-list__list-item,
+#header-component.header--glassmorphism .header__menu-item,
+#header-component.header--glassmorphism .header__inline-menu a,
+#header-component.header--glassmorphism .header__inline-menu button,
+#header-component.header--glassmorphism .menu-list__link-title {
   background-color: transparent !important;
   background: transparent !important;
+  background-image: none !important;
   border: none !important;
-  opacity: 0.7;
+  box-shadow: none !important;
+  color: #1a1a1a !important;
+}
+
+#header-component.header--glassmorphism .menu-list__link:hover,
+#header-component.header--glassmorphism .menu-list__link:focus,
+#header-component.header--glassmorphism .menu-list__list-item:hover .menu-list__link {
+  background-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 0.7 !important;
 }
 
 /* Menu spacing */
-.header--glassmorphism .menu-list__list {
+#header-component.header--glassmorphism .menu-list__list {
   gap: var(--gap-lg) !important;
 }
 
-.header--glassmorphism .menu-list__list-item {
+#header-component.header--glassmorphism .menu-list__list-item {
   margin: 0 !important;
   padding: 0 !important;
+  background: none !important;
 }
 
-.header--glassmorphism .menu-list__link {
+#header-component.header--glassmorphism .menu-list__link {
   padding: var(--padding-xs) var(--padding-sm) !important;
   margin: 0 !important;
+  background: transparent !important;
 }
 
 /* Menü öğeleri arasındaki boşlukları eşitle */

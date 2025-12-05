@@ -131,95 +131,93 @@
   }
 
   /* Header container - Flexbox layout */
-  .header__container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 100%;
-    padding: var(--padding-md) var(--padding-xl);
-    gap: var(--gap-xl);
-    position: relative;
-    z-index: 1;
-    min-height: var(--header-height);
+  #header-component.header--glassmorphism .header__container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: var(--padding-md) var(--padding-xl) !important;
+    gap: var(--gap-xl) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    min-height: var(--header-height) !important;
   }
 
-  /* Glassmorphism effect */
-  .header--glassmorphism {
+  /* Glassmorphism effect - OVERRIDE ALL OLD STYLES */
+  #header-component.header--glassmorphism,
+  header-component#header-component.header--glassmorphism {
     background: rgba(255, 255, 255, 0.8) !important;
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    position: relative !important;
+    width: 100% !important;
   }
 
   /* Sticky positioning */
   .header-section:has(> #header-component[sticky='always']),
   .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-  }
-
-  .header--glassmorphism {
-    position: relative;
-    width: 100%;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
   }
 
   /* Left section - Menu */
-  .header__left {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-    order: 1;
+  #header-component.header--glassmorphism .header__left {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    order: 1 !important;
   }
 
   /* Center section - Logo */
-  .header__center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-    order: 2;
+  #header-component.header--glassmorphism .header__center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 1 auto !important;
+    order: 2 !important;
   }
 
   /* Right section - Icons */
-  .header__right {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-md);
-    flex: 0 0 auto;
-    order: 3;
+  #header-component.header--glassmorphism .header__right {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--gap-md) !important;
+    flex: 0 0 auto !important;
+    order: 3 !important;
   }
 
   /* Mobile menu button */
-  .header__mobile-menu {
-    display: none;
-    order: 0;
+  #header-component.header--glassmorphism .header__mobile-menu {
+    display: none !important;
+    order: 0 !important;
   }
 
   /* Mobile responsive */
   @media screen and (max-width: 749px) {
-    .header__container {
-      padding: 0 var(--padding-md);
-      gap: var(--gap-md);
+    #header-component.header--glassmorphism .header__container {
+      padding: 0 var(--padding-md) !important;
+      gap: var(--gap-md) !important;
     }
 
-    .header__left {
-      display: none; /* Hide desktop menu on mobile */
+    #header-component.header--glassmorphism .header__left {
+      display: none !important; /* Hide desktop menu on mobile */
     }
 
-    .header__mobile-menu {
-      display: block;
+    #header-component.header--glassmorphism .header__mobile-menu {
+      display: block !important;
     }
 
-    .header__center {
-      flex: 1 1 auto;
-      justify-content: center;
+    #header-component.header--glassmorphism .header__center {
+      flex: 1 1 auto !important;
+      justify-content: center !important;
     }
 
-    .header__right {
-      gap: var(--gap-sm);
+    #header-component.header--glassmorphism .header__right {
+      gap: var(--gap-sm) !important;
     }
 
     body {
@@ -227,56 +225,56 @@
     }
   }
 
-  /* Clean menu styles - no backgrounds */
-  .header--glassmorphism .menu-list__link,
-  .header--glassmorphism .menu-list__list-item,
-  .header--glassmorphism .header__menu-item {
+  /* Clean menu styles - no backgrounds - STRONG SELECTORS */
+  #header-component.header--glassmorphism .menu-list__link,
+  #header-component.header--glassmorphism .menu-list__list-item,
+  #header-component.header--glassmorphism .header__menu-item,
+  #header-component.header--glassmorphism .menu-list__link-title {
     background: transparent !important;
     background-color: transparent !important;
-    color: var(--color-foreground, #1a1a1a) !important;
-    padding: var(--padding-xs) var(--padding-sm);
-    margin: 0;
-    border-radius: 0;
-    transition: color 0.3s ease;
+    background-image: none !important;
+    color: #1a1a1a !important;
+    padding: var(--padding-xs) var(--padding-sm) !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: color 0.3s ease !important;
   }
 
-  .header--glassmorphism .menu-list__link:hover,
-  .header--glassmorphism .menu-list__link:focus {
+  #header-component.header--glassmorphism .menu-list__link:hover,
+  #header-component.header--glassmorphism .menu-list__link:focus,
+  #header-component.header--glassmorphism .menu-list__list-item:hover .menu-list__link {
     background: transparent !important;
     background-color: transparent !important;
-    color: var(--color-foreground, #1a1a1a) !important;
-    opacity: 0.7;
+    background-image: none !important;
+    color: #1a1a1a !important;
+    opacity: 0.7 !important;
+    box-shadow: none !important;
   }
 
   /* Menu list spacing */
-  .header--glassmorphism .menu-list__list {
-    display: flex;
-    gap: var(--gap-lg);
-    align-items: center;
+  #header-component.header--glassmorphism .menu-list__list {
+    display: flex !important;
+    gap: var(--gap-lg) !important;
+    align-items: center !important;
   }
 
   /* Remove any button-like backgrounds from menu items */
-  .header--glassmorphism .menu-list__list-item {
+  #header-component.header--glassmorphism .menu-list__list-item {
     background: none !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  /* Remove any old background colors from header elements (except the header itself) */
-  .header--glassmorphism .menu-list__link,
-  .header--glassmorphism .menu-list__list-item,
-  .header--glassmorphism .header__menu-item,
-  .header--glassmorphism .header-actions__action,
-  .header--glassmorphism .search-action button,
-  .header--glassmorphism .dropdown-localization__button {
+  /* Remove any old background colors from header elements */
+  #header-component.header--glassmorphism .header-actions__action,
+  #header-component.header--glassmorphism .search-action button,
+  #header-component.header--glassmorphism .dropdown-localization__button {
     background-color: transparent !important;
     background: transparent !important;
-  }
-  
-  /* Glassmorphism background only on header element */
-  .header--glassmorphism {
-    background: rgba(255, 255, 255, 0.8) !important;
+    border: none !important;
   }
 
   /* Logo styling */
