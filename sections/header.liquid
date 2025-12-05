@@ -2,10 +2,26 @@
   Modern Glassmorphism Header
   - Glassmorphism effect with backdrop blur
   - Sticky positioning
-  - Flexbox layout: Menu (left) | Logo (center) | Icons (right)
+  - Clean menu styles (no backgrounds)
 {%- endcomment -%}
 
 {% liquid
+  # Default order of header elements
+  assign default_order = 'logo,menu,localization,search,mobile_search,actions'
+  
+  # Adjust order if customer accounts are enabled
+  if shop.customer_accounts_enabled
+    assign default_order = 'mobile_search,logo,menu,localization,search,actions'
+  endif
+  
+  assign header_order = default_order
+  
+  # Determine search style
+  assign search_style = 'none'
+  if section.settings.show_search
+    assign search_style = 'modal'
+  endif
+  
   # Capture header components
   capture logo
     content_for 'block', type: '_header-logo', id: 'header-logo'
@@ -19,21 +35,64 @@
     content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile'
   endcapture
   
+  capture navigation_bar
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar'
+  endcapture
+  
   capture actions
     render 'header-actions'
   endcapture
   
-  # Search
-  assign search_style = 'none'
-  if section.settings.show_search
-    assign search_style = 'modal'
+  # Handle search positioning
+  assign search_class = ''
+  if shop.customer_accounts_enabled
+    assign search_class = 'mobile:hidden'
   endif
   
+  # Adjust order based on localization and search positions
+  if section.settings.localization_position == 'left'
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign header_order = 'mobile_search,logo,search,localization,menu,actions'
+      else
+        assign header_order = 'logo,search,localization,menu,mobile_search,actions'
+      endif
+    else
+      if shop.customer_accounts_enabled
+        assign header_order = 'mobile_search,logo,localization,menu,search,actions'
+      else
+        assign header_order = 'logo,localization,menu,search,mobile_search,actions'
+      endif
+    endif
+  else
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign header_order = 'mobile_search,logo,search,menu,localization,actions'
+      else
+        assign header_order = 'logo,search,menu,localization,mobile_search,actions'
+      endif
+    endif
+  endif
+  
+  # Capture search component
   capture search
-    render 'search', style: search_style
+    render 'search', style: search_style, class: search_class
   endcapture
   
-  # Localization
+  # Handle mobile search
+  assign skip_mobile_search = false
+  if shop.customer_accounts_enabled == false and section.settings.search_position == 'left' and search_style != 'none'
+    assign skip_mobile_search = true
+  endif
+  
+  assign mobile_search = blank
+  if section.settings.search_row == 'bottom' or search_style != 'none' and skip_mobile_search == false
+    capture mobile_search
+      render 'search', class: 'desktop:hidden', style: search_style
+    endcapture
+  endif
+  
+  # Handle localization
   assign show_language = section.settings.show_language
   if localization.available_languages.size <= 1
     assign show_language = false
@@ -55,8 +114,40 @@
     endcapture
   endif
   
+  # Determine bottom row blocks
+  assign bottom_row_blocks = ''
+  
+  if section.settings.menu_row == 'bottom'
+    assign bottom_row_blocks = bottom_row_blocks | append: 'menu,'
+  endif
+  
+  if section.settings.search_style != 'none'
+    if section.settings.search_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'search,'
+    endif
+  endif
+  
+  if section.settings.show_country or section.settings.show_language
+    if section.settings.localization_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'localization,'
+    endif
+  endif
+  
+  assign bottom_row_blocks = bottom_row_blocks | split: ',' | compact
+  
+  # Header height class
+  assign header_height_class = ''
+  if section.settings.section_height == 'compact'
+    assign header_height_class = ' header--compact'
+  endif
+  
+  # Build header classes
+  assign header_class = 'header header--glassmorphism'
+  
   # Sticky header - always enabled
   assign sticky = 'always'
+  
+  assign rows = 'top,bottom' | split: ','
 -%}
 
 {%- comment -%} Schema.org structured data {%- endcomment -%}
@@ -75,7 +166,7 @@
 {%- comment -%} Main header component {%- endcomment -%}
 <header-component
   id="header-component"
-  class="header header--glassmorphism"
+  class="{{ header_class }}"
   sticky="{{ sticky }}"
   data-skip-node-update
   data-scroll-direction="none"
@@ -84,36 +175,75 @@
     <h1 class="visually-hidden">{{ shop.name }}</h1>
   {%- endif -%}
   
-  <div class="header__container" ref="headerRowTop">
-    {%- comment -%} Mobile menu button {%- endcomment -%}
-    <div class="header__mobile-menu">
-      {{ mobile_menu }}
-    </div>
+  {%- comment -%} Render header rows {%- endcomment -%}
+  {% for row in rows %}
+    {% liquid
+      assign scheme = 'color_scheme_' | append: row
+      assign row_class = 'header__row header__row--' | append: row | append: ' section section--full-width-margin section--page-width'
+      
+      case row
+        when 'top'
+          assign first = mobile_menu
+          
+          if bottom_row_blocks.size > 0 and section.settings.divider_size == 'page-width'
+            assign row_class = row_class | append: ' divider--page-width'
+          endif
+          
+          if bottom_row_blocks.size > 0
+            assign border_bottom_setting_id = 'divider_width'
+          else
+            assign border_bottom_setting_id = 'border_width'
+          endif
+        when 'bottom'
+          assign first = ''
+          assign row_class = row_class | append: ' mobile:hidden'
+          assign border_bottom_setting_id = 'border_width'
+      endcase
+      
+      assign row_style = '--border-bottom-width: ' | append: section.settings[border_bottom_setting_id] | append: 'px; '
+      
+      if row == 'top'
+        assign row_style = row_style | append: '--border-bottom-width-mobile: ' | append: section.settings.border_width | append: 'px; '
+      endif
+    %}
     
-    {%- comment -%} Left: Menu {%- endcomment -%}
-    <div class="header__left" ref="headerMenu">
-      {{ menu }}
-    </div>
+    {% capture row_content %}
+      {% render 'header-row',
+        row: row,
+        order: header_order,
+        settings: section.settings,
+        first: first,
+        logo: logo,
+        menu: menu,
+        actions: actions,
+        localization: localization_markup,
+        search: search,
+        mobile_search: mobile_search
+      %}
+    {% endcapture %}
     
-    {%- comment -%} Center: Logo {%- endcomment -%}
-    <div class="header__center">
-      {{ logo }}
-    </div>
-    
-    {%- comment -%} Right: Search, Localization, Actions {%- endcomment -%}
-    <div class="header__right">
-      {% if search_style != 'none' %}
-        {{ search }}
-      {% endif %}
-      {% if localization_markup != blank %}
-        {{ localization_markup }}
-      {% endif %}
-      {{ actions }}
-    </div>
-  </div>
+    {% assign row_content = row_content | strip %}
+    {% if row_content != blank %}
+      <div
+        class="{{ row_class | strip }}"
+        {% if row == 'top' %}ref="headerRowTop"{% endif %}
+        {%- if row_style != blank -%}
+          style="{{ row_style | strip }}"
+        {%- endif -%}
+      >
+        <div class="header__columns spacing-style">
+          {{ row_content }}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
   
-  {%- comment -%} Header drawer container for mobile menu {%- endcomment -%}
-  <div ref="headerDrawerContainer"></div>
+  {%- comment -%} Mobile navigation bar {%- endcomment -%}
+  {% if navigation_bar != blank %}
+    <div class="header__row header__row--mobile desktop:hidden">
+      {{ navigation_bar }}
+    </div>
+  {% endif %}
 </header-component>
 
 {%- comment -%} Header JavaScript {%- endcomment -%}
@@ -124,26 +254,6 @@
 
 {%- comment -%} Modern Glassmorphism Header Styles {%- endcomment -%}
 {% stylesheet %}
-  /* Header height variable */
-  body {
-    --header-height: 80px;
-    --header-group-height: var(--header-height);
-  }
-
-  /* Header container - Flexbox layout */
-  #header-component.header--glassmorphism .header__container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: var(--padding-md) var(--padding-xl) !important;
-    gap: var(--gap-xl) !important;
-    position: relative !important;
-    z-index: 1 !important;
-    min-height: var(--header-height) !important;
-  }
-
   /* Glassmorphism effect - OVERRIDE ALL OLD STYLES */
   #header-component.header--glassmorphism,
   header-component#header-component.header--glassmorphism {
@@ -154,6 +264,29 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
     position: relative !important;
     width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Header row - apply glassmorphism effect */
+  #header-component.header--glassmorphism .header__row,
+  #header-component.header--glassmorphism .header__row--top,
+  #header-component.header--glassmorphism .header__row--bottom {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+
+  /* Header columns - ensure layout works */
+  #header-component.header--glassmorphism .header__columns {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  #header-component.header--glassmorphism .header__column {
+    background: transparent !important;
+    background-color: transparent !important;
   }
 
   /* Sticky positioning */
@@ -164,68 +297,7 @@
     z-index: 9999 !important;
   }
 
-  /* Left section - Menu */
-  #header-component.header--glassmorphism .header__left {
-    display: flex !important;
-    align-items: center !important;
-    flex: 0 0 auto !important;
-    order: 1 !important;
-  }
-
-  /* Center section - Logo */
-  #header-component.header--glassmorphism .header__center {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex: 1 1 auto !important;
-    order: 2 !important;
-  }
-
-  /* Right section - Icons */
-  #header-component.header--glassmorphism .header__right {
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--gap-md) !important;
-    flex: 0 0 auto !important;
-    order: 3 !important;
-  }
-
-  /* Mobile menu button */
-  #header-component.header--glassmorphism .header__mobile-menu {
-    display: none !important;
-    order: 0 !important;
-  }
-
-  /* Mobile responsive */
-  @media screen and (max-width: 749px) {
-    #header-component.header--glassmorphism .header__container {
-      padding: 0 var(--padding-md) !important;
-      gap: var(--gap-md) !important;
-    }
-
-    #header-component.header--glassmorphism .header__left {
-      display: none !important; /* Hide desktop menu on mobile */
-    }
-
-    #header-component.header--glassmorphism .header__mobile-menu {
-      display: block !important;
-    }
-
-    #header-component.header--glassmorphism .header__center {
-      flex: 1 1 auto !important;
-      justify-content: center !important;
-    }
-
-    #header-component.header--glassmorphism .header__right {
-      gap: var(--gap-sm) !important;
-    }
-
-    body {
-      --header-height: 70px;
-    }
-  }
-
-  /* Clean menu styles - no backgrounds - STRONG SELECTORS */
+  /* Clean menu styles - no backgrounds, just text */
   #header-component.header--glassmorphism .menu-list__link,
   #header-component.header--glassmorphism .menu-list__list-item,
   #header-component.header--glassmorphism .header__menu-item,
@@ -268,7 +340,7 @@
     margin: 0 !important;
   }
 
-  /* Remove any old background colors from header elements */
+  /* Remove backgrounds from actions and buttons */
   #header-component.header--glassmorphism .header-actions__action,
   #header-component.header--glassmorphism .search-action button,
   #header-component.header--glassmorphism .dropdown-localization__button {
@@ -277,45 +349,28 @@
     border: none !important;
   }
 
-  /* Logo styling */
-  .header--glassmorphism .header-logo {
-    display: flex;
-    align-items: center;
+  /* Ensure header columns layout works properly */
+  #header-component.header--glassmorphism .header__column {
+    display: flex !important;
+    align-items: center !important;
   }
 
-  /* Actions styling */
-  .header--glassmorphism .header-actions__action {
-    background: transparent !important;
-    border: none !important;
-    color: var(--color-foreground, #1a1a1a);
+  /* Menu in left column */
+  #header-component.header--glassmorphism .header__column--left header-menu,
+  #header-component.header--glassmorphism .header__column--left .menu-list {
+    display: flex !important;
+    align-items: center !important;
   }
 
-  /* Search button styling */
-  .header--glassmorphism .search-action button {
-    background: transparent !important;
-    border: none !important;
-    color: var(--color-foreground, #1a1a1a);
+  /* Logo in center column */
+  #header-component.header--glassmorphism .header__column--center {
+    justify-content: center !important;
   }
 
-  /* Localization button styling */
-  .header--glassmorphism .dropdown-localization__button {
-    background: transparent !important;
-    border: none !important;
-    color: var(--color-foreground, #1a1a1a);
-  }
-
-  /* Smooth transitions */
-  .header--glassmorphism {
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
-  }
-
-  /* Ensure content scrolls under header */
-  body:has(.header--glassmorphism) {
-    padding-top: 0;
-  }
-
-  main > .shopify-section:first-child {
-    margin-top: 0;
+  /* Icons in right column */
+  #header-component.header--glassmorphism .header__column--right {
+    justify-content: flex-end !important;
+    gap: var(--gap-md) !important;
   }
 {% endstylesheet %}
 
@@ -383,6 +438,22 @@
       "default": "left"
     },
     {
+      "type": "select",
+      "id": "menu_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top"
+    },
+    {
       "type": "header",
       "content": "t:content.search"
     },
@@ -391,6 +462,40 @@
       "id": "show_search",
       "label": "t:settings.search_icon",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "search_position",
+      "label": "t:settings.search_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
+      "id": "search_row",
+      "label": "t:settings.search_row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_search }}"
     },
     {
       "type": "header",
@@ -433,6 +538,76 @@
       ],
       "default": "right",
       "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "select",
+      "id": "localization_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "t:settings.divider_thickness",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "select",
+      "id": "divider_size",
+      "label": "t:settings.divider_width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "select",
+      "id": "section_height",
+      "label": "t:settings.height",
+      "options": [
+        {
+          "value": "compact",
+          "label": "t:options.compact"
+        },
+        {
+          "value": "standard",
+          "label": "t:options.standard"
+        }
+      ],
+      "default": "standard"
     }
   ],
   "presets": []

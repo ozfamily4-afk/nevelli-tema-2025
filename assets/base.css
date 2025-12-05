@@ -4363,7 +4363,7 @@ ul li a:hover span {
   transform: scale(1.08);
 }
 /* === MODERN GLASSMORPHISM HEADER - OVERRIDE ALL OLD STYLES === */
-/* Glassmorphism header background */
+/* Glassmorphism header background - Applied to header component */
 #header-component.header--glassmorphism,
 header-component#header-component.header--glassmorphism {
   background: rgba(255, 255, 255, 0.8) !important;
@@ -4371,6 +4371,26 @@ header-component#header-component.header--glassmorphism {
   -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Header rows - apply glassmorphism effect */
+#header-component.header--glassmorphism .header__row,
+#header-component.header--glassmorphism .header__row--top,
+#header-component.header--glassmorphism .header__row--bottom {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Header columns - ensure proper layout */
+#header-component.header--glassmorphism .header__columns {
+  background: transparent !important;
+}
+
+#header-component.header--glassmorphism .header__column {
+  background: transparent !important;
 }
 
 /* Clean menu styles - no backgrounds, just text - STRONG SELECTORS */
@@ -4414,6 +4434,15 @@ header-component#header-component.header--glassmorphism {
   padding: var(--padding-xs) var(--padding-sm) !important;
   margin: 0 !important;
   background: transparent !important;
+}
+
+/* Actions and buttons - remove backgrounds */
+#header-component.header--glassmorphism .header-actions__action,
+#header-component.header--glassmorphism .search-action button,
+#header-component.header--glassmorphism .dropdown-localization__button {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Menü öğeleri arasındaki boşlukları eşitle */
