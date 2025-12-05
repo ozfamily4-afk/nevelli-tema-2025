@@ -4362,140 +4362,41 @@ ul li a:hover span {
   -webkit-text-fill-color: transparent;
   transform: scale(1.08);
 }
-/* === NAVELLI TRANSPARENT MENU + SMOOTH SCROLL FADE + HOVER WHITE BACKGROUND === */
-
-/* Menü yazı stili */
-.header[transparent] .menu-list__link,
-.header[transparent] .header__menu-item,
-.header[transparent] .header__inline-menu a,
-.header[transparent] .header__inline-menu button {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  text-shadow: 0 0 8px rgba(0,0,0,0.75);
-  -webkit-text-stroke: 0.3px rgba(0,0,0,0.4);
-  transition: color 0.4s ease, text-shadow 0.4s ease;
-}
-
-/* Hover rengi */
-.header[transparent] .menu-list__link:hover,
-.header[transparent] .header__menu-item:hover,
-.header[transparent] .header__inline-menu a:hover,
-.header[transparent] .header__inline-menu button:hover {
-  color: #BCCF11 !important;
-  text-shadow: 0 0 10px rgba(0,0,0,0.5);
-}
-
-/* Header transparan başlangıç */
-.header[transparent] {
-  background: transparent !important;
-  --header-bg-color: transparent !important;
-  box-shadow: none !important;
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  transition: background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-/* Scroll sonrası beyazlaşır */
-.header[transparent][data-sticky-state='active'] {
-  background: rgba(255,255,255,0.97) !important;
-  --header-bg-color: rgba(255,255,255,0.97) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-  transition: background-color 0.6s ease, box-shadow 0.6s ease;
-}
-
-/* Scroll sonrası yazılar siyah */
-.header[transparent][data-sticky-state='active'] .menu-list__link,
-.header[transparent][data-sticky-state='active'] .header__menu-item,
-.header[transparent][data-sticky-state='active'] .header__inline-menu a,
-.header[transparent][data-sticky-state='active'] .header__inline-menu button {
-  color: #000 !important;
-  text-shadow: none !important;
-  transition: color 0.5s ease;
-}
-
-/* Hover rengi sabit kalsın */
-.header[transparent][data-sticky-state='active'] .menu-list__link:hover,
-.header[transparent][data-sticky-state='active'] .header__menu-item:hover,
-.header[transparent][data-sticky-state='active'] .header__inline-menu a:hover,
-.header[transparent][data-sticky-state='active'] .header__inline-menu button:hover {
-  color: #BCCF11 !important;
-}
-
-/* Logo beyazken */
-.header[transparent] .header__heading-link img {
-  filter: brightness(10) invert(1);
-  transition: filter 0.5s ease;
-}
-
-/* Scroll sonrası logo normale döner */
-.header[transparent][data-sticky-state='active'] .header__heading-link img {
-  filter: none;
-}
-
-/* 🧠 Yeni: Menüye hover yapılınca da header beyazlaşır */
-.header[transparent]:has(.menu-list__link:hover),
-.header[transparent]:has(.header__menu-item:hover),
-.header[transparent]:has(.header__inline-menu a:hover),
-.header[transparent]:has(.header__inline-menu button:hover) {
-  background: rgba(255,255,255,0.97) !important;
-  --header-bg-color: rgba(255,255,255,0.97) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-}
-
-/* Hover sırasında yazılar siyahlaşır */
-.header[transparent]:has(.menu-list__link:hover) .menu-list__link,
-.header[transparent]:has(.header__menu-item:hover) .header__menu-item,
-.header[transparent]:has(.header__inline-menu a:hover) .header__inline-menu a,
-.header[transparent]:has(.header__inline-menu button:hover) .header__inline-menu button {
-  color: #000 !important;
-  text-shadow: none !important;
-}
-/* === Alt menü açıkken de header beyaz kalsın === */
-.header[transparent]:has(.menu-list__link[aria-haspopup='true'][aria-expanded='true']),
-.header[transparent]:has(.menu-list__link[aria-haspopup='true'][data-animating]),
-.header[transparent]:has(.mega-menu__list:hover),
-.header[transparent]:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'], [data-animating])) {
-  background: rgba(255,255,255,0.97) !important;
-  --header-bg-color: rgba(255,255,255,0.97) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-  backdrop-filter: blur(10px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-}
-
-/* Menü açıkken yazılar siyah kalsın */
-.header[transparent]:has(.menu-list__link[aria-expanded='true']) .menu-list__link,
-.header[transparent]:has(.mega-menu__list:hover) .menu-list__link {
-  color: #000 !important;
-  text-shadow: none !important;
-}
-
-/* === NAVELLI MENÜ DÜZELTMELERİ: GRI ARKA PLAN KALDIRMA + SİYAH YAZI + EŞİT BOŞLUK === */
-/* Menü öğelerindeki gri arka planı kaldır */
-.menu-list__link,
-.menu-list__list-item,
-.header__menu-item,
-.header__inline-menu a,
-.header__inline-menu button {
+/* === MODERN GLASSMORPHISM HEADER === */
+/* Clean menu styles - no backgrounds, just text */
+.header--glassmorphism .menu-list__link,
+.header--glassmorphism .menu-list__list-item,
+.header--glassmorphism .header__menu-item,
+.header--glassmorphism .header__inline-menu a,
+.header--glassmorphism .header__inline-menu button {
   background-color: transparent !important;
   background: transparent !important;
+  border: none !important;
+  color: var(--color-foreground, #1a1a1a) !important;
 }
 
-/* Menü öğeleri için şeffaf arka plan üzerinde siyah/koyu gri yazı */
-.menu-list__link,
-.menu-list__link-title {
-  color: #1a1a1a !important;
+.header--glassmorphism .menu-list__link:hover,
+.header--glassmorphism .menu-list__link:focus,
+.header--glassmorphism .menu-list__list-item:hover .menu-list__link {
   background-color: transparent !important;
   background: transparent !important;
+  border: none !important;
+  opacity: 0.7;
 }
 
-/* Hover durumunda da arka plan şeffaf kalmalı */
-.menu-list__link:hover,
-.menu-list__link:focus,
-.menu-list__list-item:hover .menu-list__link {
-  background-color: transparent !important;
-  background: transparent !important;
+/* Menu spacing */
+.header--glassmorphism .menu-list__list {
+  gap: var(--gap-lg) !important;
+}
+
+.header--glassmorphism .menu-list__list-item {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.header--glassmorphism .menu-list__link {
+  padding: var(--padding-xs) var(--padding-sm) !important;
+  margin: 0 !important;
 }
 
 /* Menü öğeleri arasındaki boşlukları eşitle */
