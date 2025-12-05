@@ -251,7 +251,7 @@
     {% if content != blank %}
       <div
         class="{{ class | strip }}"
-        ref="headerRowTop"
+        {% if row == 'top' %}ref="headerRowTop"{% endif %}
         {%- if style != blank -%}
           style="{{ style | strip }}"
         {%- endif -%}

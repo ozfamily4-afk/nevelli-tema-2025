@@ -19,16 +19,19 @@
         assign item_column = 'right'
     endcase
 
-    if item_row == row
-      case item_column
-        when 'left'
-          assign left = left | append: item | append: ' '
-        when 'center'
-          assign center = center | append: item | append: ' '
-        else
-          assign right = right | append: item | append: ' '
-      endcase
-    endif
+    # Skip logo in bottom row - logo should only appear in top row
+    unless item == 'logo' and row == 'bottom'
+      if item_row == row
+        case item_column
+          when 'left'
+            assign left = left | append: item | append: ' '
+          when 'center'
+            assign center = center | append: item | append: ' '
+          else
+            assign right = right | append: item | append: ' '
+        endcase
+      endif
+    endunless
   endfor
 
   assign columns = 'left,center,right' | split: ','
