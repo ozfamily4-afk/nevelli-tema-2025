@@ -4309,6 +4309,34 @@ text-component {
   }
 }
 
+/* === NAVELLI LOGO TEKRARINI ÖNLEME === */
+/* Header içinde sadece bir logo görünmeli - CSS değişkenleri ile kontrol edilen görünürlük */
+.header .header-logo .header-logo__image-container--inverse {
+  display: var(--header-logo-inverse-display, none) !important;
+}
+
+.header .header-logo:has(.header-logo__image-container--inverse) .header-logo__image-container--original {
+  display: var(--header-logo-display, block) !important;
+}
+
+/* Header içinde aynı anda birden fazla logo görünmesini engelle */
+.header .header-logo .header-logo__image-container {
+  display: none;
+}
+
+.header .header-logo .header-logo__image-container--original {
+  display: var(--header-logo-display, block);
+}
+
+.header .header-logo .header-logo__image-container--inverse {
+  display: var(--header-logo-inverse-display, none);
+}
+
+/* Header içinde birden fazla header-logo varsa sadece ilkini göster */
+.header .header-logo:not(:first-of-type) {
+  display: none !important;
+}
+
 /* Menü hover efekti - Altın gradient + parlama */
 .menu-list__link-title {
   transition: all 0.4s ease;
@@ -4442,6 +4470,54 @@ ul li a:hover span {
   color: #000 !important;
   text-shadow: none !important;
 }
+
+/* === NAVELLI MENÜ DÜZELTMELERİ: GRI ARKA PLAN KALDIRMA + SİYAH YAZI + EŞİT BOŞLUK === */
+/* Menü öğelerindeki gri arka planı kaldır */
+.menu-list__link,
+.menu-list__list-item,
+.header__menu-item,
+.header__inline-menu a,
+.header__inline-menu button {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Menü öğeleri için şeffaf arka plan üzerinde siyah/koyu gri yazı */
+.menu-list__link,
+.menu-list__link-title {
+  color: #1a1a1a !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Hover durumunda da arka plan şeffaf kalmalı */
+.menu-list__link:hover,
+.menu-list__link:focus,
+.menu-list__list-item:hover .menu-list__link {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Menü öğeleri arasındaki boşlukları eşitle */
+.menu-list__list {
+  gap: var(--menu-horizontal-gap, var(--gap-xl)) !important;
+}
+
+.menu-list__list-item {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.menu-list__link {
+  padding: calc(var(--header-padding, var(--padding-sm))) calc(var(--gap-xl) / 2) !important;
+  margin: 0 !important;
+}
+
+/* Overflow menu için de aynı düzenlemeler */
+.overflow-menu::part(list) {
+  gap: var(--menu-horizontal-gap, var(--gap-xl)) !important;
+}
+
 /* === NAVELLI MEGA MENU BAŞLIKLARI (ALTIN RENK VE ORTALANMIŞ ÇİZGİ) === */
 a.mega-menu__link.mega-menu__link--parent > .mega-menu__link-title.wrap-text {
   position: relative;
